@@ -51,7 +51,7 @@ export function CreateBookingForm() {
       if (mode === "check") {
         setResult({
           kind: "success",
-          message: `${selectedItem?.sku ?? "Selected item"} is available for ${startDate} to ${endDate}.`
+          message: `${selectedItem?.barcode ?? "Selected item"} is available for ${startDate} to ${endDate}.`
         });
         return;
       }
@@ -125,7 +125,7 @@ export function CreateBookingForm() {
           <select required value={inventoryItemId} onChange={(event) => setInventoryItemId(event.target.value)}>
             {sampleInventoryItems.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.sku} - {item.name} - {item.sizeLabel} - {formatEnumLabel(item.status)}
+                {item.barcode} - {item.brand} {item.styleName} - {item.size} - {formatEnumLabel(item.status)}
               </option>
             ))}
           </select>

@@ -8,7 +8,6 @@ export const inventoryStatuses = [
   "RETURNED",
   "CLEANING",
   "REPAIR",
-  "LOST",
   "RETIRED"
 ] as const;
 
@@ -22,12 +21,18 @@ export type BookingStatus = ActiveBookingStatus | "RETURNED" | "CANCELLED";
 export type InventoryItem = {
   id: string;
   sku: string;
+  brand: string;
+  styleName: string;
   category: InventoryCategory;
-  name: string;
-  sizeLabel: string;
   colour: string;
+  size: string;
+  barcode: string;
+  rackLocation: string;
+  condition: string;
   status: InventoryStatus;
-  replacementValueCents: number;
+  purchaseCostCents: number;
+  replacementCostCents: number;
+  notes: string;
 };
 
 export type Booking = {

@@ -15,7 +15,6 @@ CREATE TYPE inventory_status AS ENUM (
   'RETURNED',
   'CLEANING',
   'REPAIR',
-  'LOST',
   'RETIRED'
 );
 
@@ -30,13 +29,18 @@ CREATE TYPE booking_status AS ENUM (
 CREATE TABLE inventory_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   sku text NOT NULL UNIQUE,
+  brand text NOT NULL,
+  style_name text NOT NULL,
   category inventory_category NOT NULL,
-  name text NOT NULL,
-  size_label text NOT NULL,
   colour text NOT NULL,
+  size text NOT NULL,
+  barcode text NOT NULL UNIQUE,
+  rack_location text NOT NULL,
+  condition text NOT NULL,
   status inventory_status NOT NULL DEFAULT 'AVAILABLE',
-  replacement_value_cents integer NOT NULL CHECK (replacement_value_cents >= 0),
-  notes text,
+  purchase_cost_cents integer NOT NULL CHECK (purchase_cost_cents >= 0),
+  replacement_cost_cents integer NOT NULL CHECK (replacement_cost_cents >= 0),
+  notes text NOT NULL DEFAULT '',
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );

@@ -7,7 +7,7 @@ function getStatusClass(status: string): string {
     return "status status-available";
   }
 
-  if (["REPAIR", "LOST", "RETIRED"].includes(status)) {
+  if (["REPAIR", "RETIRED"].includes(status)) {
     return "status status-problem";
   }
 
@@ -30,10 +30,14 @@ export default function InventoryListPage() {
             <thead>
               <tr>
                 <th>Item ID</th>
+                <th>Brand</th>
+                <th>Style Name</th>
                 <th>Category</th>
-                <th>Style</th>
                 <th>Colour</th>
                 <th>Size</th>
+                <th>Barcode</th>
+                <th>Rack</th>
+                <th>Condition</th>
                 <th>Status</th>
                 <th>Detail</th>
               </tr>
@@ -42,10 +46,14 @@ export default function InventoryListPage() {
               {sampleInventoryItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
+                  <td>{item.brand}</td>
+                  <td>{item.styleName}</td>
                   <td>{formatEnumLabel(item.category)}</td>
-                  <td>{item.name}</td>
                   <td>{item.colour}</td>
-                  <td>{item.sizeLabel}</td>
+                  <td>{item.size}</td>
+                  <td>{item.barcode}</td>
+                  <td>{item.rackLocation}</td>
+                  <td>{item.condition}</td>
                   <td>
                     <span className={getStatusClass(item.status)}>{formatEnumLabel(item.status)}</span>
                   </td>

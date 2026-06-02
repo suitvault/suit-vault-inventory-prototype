@@ -15,8 +15,10 @@ export default async function InventoryDetailPage({ params }: { params: Promise<
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>{item.name}</h1>
-          <p className="muted">{item.sku}</p>
+          <h1>{item.styleName}</h1>
+          <p className="muted">
+            {item.brand} · {item.barcode}
+          </p>
         </div>
         <Link className="button secondary" href="/inventory">
           Back to inventory

@@ -26,7 +26,7 @@ export function getAssignedItemLabels(booking: Booking): string[] {
 
   return booking.inventoryItemIds.map((itemId) => {
     const item = inventoryById.get(itemId);
-    return item ? `${item.sku} ${item.name}` : itemId;
+    return item ? `${item.barcode} ${item.styleName}` : itemId;
   });
 }
 
@@ -39,7 +39,7 @@ export function getDashboardMetrics(bookings: Booking[] = sampleBookings) {
     activeBookings: activeBookings.length,
     outOnHireItems: sampleInventoryItems.filter((item) => item.status === "OUT_ON_HIRE").length,
     needsAttentionItems: sampleInventoryItems.filter((item) =>
-      ["CLEANING", "REPAIR", "LOST", "RETIRED"].includes(item.status)
+      ["CLEANING", "REPAIR", "RETIRED"].includes(item.status)
     ).length
   };
 }

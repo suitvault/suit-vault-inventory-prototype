@@ -12,7 +12,7 @@ function getStatusClass(status: string): string {
     return "status status-available";
   }
 
-  if (["REPAIR", "LOST", "RETIRED"].includes(status)) {
+  if (["REPAIR", "RETIRED"].includes(status)) {
     return "status status-problem";
   }
 
@@ -50,12 +50,16 @@ export function InventoryDetailClient({ item }: { item: InventoryItem }) {
             <dd>{item.sku}</dd>
           </div>
           <div className="detail-row">
-            <dt>Category</dt>
-            <dd>{formatEnumLabel(item.category)}</dd>
+            <dt>Brand</dt>
+            <dd>{item.brand}</dd>
           </div>
           <div className="detail-row">
-            <dt>Style</dt>
-            <dd>{item.name}</dd>
+            <dt>Style Name</dt>
+            <dd>{item.styleName}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Category</dt>
+            <dd>{formatEnumLabel(item.category)}</dd>
           </div>
           <div className="detail-row">
             <dt>Colour</dt>
@@ -63,15 +67,35 @@ export function InventoryDetailClient({ item }: { item: InventoryItem }) {
           </div>
           <div className="detail-row">
             <dt>Size</dt>
-            <dd>{item.sizeLabel}</dd>
+            <dd>{item.size}</dd>
           </div>
           <div className="detail-row">
-            <dt>Replacement value</dt>
-            <dd>{formatMoney(item.replacementValueCents)}</dd>
+            <dt>Barcode</dt>
+            <dd>{item.barcode}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Rack Location</dt>
+            <dd>{item.rackLocation}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Condition</dt>
+            <dd>{item.condition}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Purchase Cost</dt>
+            <dd>{formatMoney(item.purchaseCostCents)}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Replacement Cost</dt>
+            <dd>{formatMoney(item.replacementCostCents)}</dd>
           </div>
           <div className="detail-row">
             <dt>Current status</dt>
             <dd>{formatEnumLabel(item.status)}</dd>
+          </div>
+          <div className="detail-row">
+            <dt>Notes</dt>
+            <dd>{item.notes}</dd>
           </div>
         </dl>
       </section>
