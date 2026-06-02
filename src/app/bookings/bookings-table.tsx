@@ -2,18 +2,26 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { readCreatedBookings, subscribeToCreatedBookings } from "@/lib/browser-booking-store";
+import { readInventoryItems, subscribeToInventory } from "@/lib/browser-inventory-store";
 import { formatBookingNumber, formatEnumLabel } from "@/lib/formatting";
 import { getAssignedItemLabels } from "@/lib/inventory-data";
 import { sampleBookings } from "@/lib/sample-bookings";
-import type { Booking } from "@/lib/types";
+import type { Booking, InventoryItem } from "@/lib/types";
 
 export function BookingsTable() {
   const [createdBookings, setCreatedBookings] = useState<Booking[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(() => readInventoryItems());
 
   useEffect(() => {
     const refresh = () => setCreatedBookings(readCreatedBookings());
     refresh();
     return subscribeToCreatedBookings(refresh);
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => setInventoryItems(readInventoryItems());
+    refresh();
+    return subscribeToInventory(refresh);
   }, []);
 
   const bookings = useMemo(
@@ -42,7 +50,7 @@ export function BookingsTable() {
                 <td>{booking.customerName}</td>
                 <td>{booking.startDate}</td>
                 <td>{booking.endDate}</td>
-                <td>{getAssignedItemLabels(booking).join(", ")}</td>
+                <td>{getAssignedItemLabels(booking, inventoryItems).join(", ")}</td>
                 <td>{formatEnumLabel(booking.status)}</td>
               </tr>
             ))}

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { getInventoryItem } from "@/lib/inventory-data";
 import { InventoryDetailClient } from "./inventory-detail-client";
 
@@ -7,25 +6,24 @@ export default async function InventoryDetailPage({ params }: { params: Promise<
   const { itemId } = await params;
   const item = getInventoryItem(itemId);
 
-  if (!item) {
-    notFound();
-  }
-
   return (
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>{item.styleName}</h1>
-          <p className="muted">
-            {item.brand} · {item.barcode}
-          </p>
+          <h1>{item?.styleName ?? "Inventory Item"}</h1>
+          <p className="muted">{item ? `${item.brand} - ${item.barcode}` : itemId}</p>
         </div>
-        <Link className="button secondary" href="/inventory">
-          Back to inventory
-        </Link>
+        <div className="actions">
+          <Link className="button secondary" href="/inventory">
+            Back to inventory
+          </Link>
+          <Link className="button" href={`/inventory/${itemId}/edit`}>
+            Edit item
+          </Link>
+        </div>
       </div>
 
-      <InventoryDetailClient item={item} />
+      <InventoryDetailClient itemId={itemId} initialItem={item} />
     </main>
   );
 }

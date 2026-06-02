@@ -68,6 +68,17 @@ CREATE INDEX inventory_items_category_status_idx ON inventory_items (category, s
 CREATE INDEX booking_items_inventory_item_id_idx ON booking_items (inventory_item_id);
 CREATE INDEX bookings_active_range_idx ON bookings (status, start_date, end_date);
 
+CREATE TABLE inventory_status_history (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  inventory_item_id uuid NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
+  from_status inventory_status,
+  to_status inventory_status NOT NULL,
+  note text NOT NULL DEFAULT '',
+  changed_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX inventory_status_history_item_idx ON inventory_status_history (inventory_item_id, changed_at DESC);
+
 CREATE OR REPLACE FUNCTION prevent_overlapping_booking_items()
 RETURNS trigger AS $$
 DECLARE

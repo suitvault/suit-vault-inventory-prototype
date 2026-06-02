@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { saveCreatedBooking, readCreatedBookings } from "@/lib/browser-booking-store";
+import { readInventoryItems, subscribeToInventory } from "@/lib/browser-inventory-store";
 import { BookingConflictError, BookingValidationError, createBooking } from "@/lib/booking-conflicts";
 import { formatBookingNumber, formatEnumLabel } from "@/lib/formatting";
 import { getAssignedItemLabels } from "@/lib/inventory-data";
 import { sampleBookings } from "@/lib/sample-bookings";
-import { sampleInventoryItems } from "@/lib/seed-data";
-import type { Booking, BookingRequest } from "@/lib/types";
+import type { Booking, BookingRequest, InventoryItem } from "@/lib/types";
 
 type FormMode = "check" | "create";
 type ResultState =
@@ -18,14 +18,26 @@ type ResultState =
 export function CreateBookingForm() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [inventoryItemId, setInventoryItemId] = useState(sampleInventoryItems[0]?.id ?? "");
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(() => readInventoryItems());
+  const [inventoryItemId, setInventoryItemId] = useState(() => readInventoryItems()[0]?.id ?? "");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [result, setResult] = useState<ResultState>({ kind: "idle" });
 
+  useEffect(() => {
+    const refresh = () => {
+      const items = readInventoryItems();
+      setInventoryItems(items);
+      setInventoryItemId((currentItemId) => currentItemId || items[0]?.id || "");
+    };
+
+    refresh();
+    return subscribeToInventory(refresh);
+  }, []);
+
   const selectedItem = useMemo(
-    () => sampleInventoryItems.find((item) => item.id === inventoryItemId),
-    [inventoryItemId]
+    () => inventoryItems.find((item) => item.id === inventoryItemId),
+    [inventoryItemId, inventoryItems]
   );
 
   function buildRequest(): BookingRequest {
@@ -44,7 +56,7 @@ export function CreateBookingForm() {
 
     try {
       const booking = createBooking(existingBookings, request, {
-        inventoryItems: sampleInventoryItems,
+        inventoryItems,
         id: `booking-${Date.now()}`
       });
 
@@ -123,7 +135,7 @@ export function CreateBookingForm() {
         <label>
           Item
           <select required value={inventoryItemId} onChange={(event) => setInventoryItemId(event.target.value)}>
-            {sampleInventoryItems.map((item) => (
+            {inventoryItems.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.barcode} - {item.brand} {item.styleName} - {item.size} - {formatEnumLabel(item.status)}
               </option>
@@ -142,10 +154,10 @@ export function CreateBookingForm() {
         </label>
 
         <div className="actions">
-          <button className="button secondary" type="button" onClick={() => handleAction("check")}>
+          <button className="button secondary" type="button" onClick={() => handleAction("check")} disabled={!inventoryItemId}>
             Check availability
           </button>
-          <button className="button" type="button" onClick={() => handleAction("create")}>
+          <button className="button" type="button" onClick={() => handleAction("create")} disabled={!inventoryItemId}>
             Create booking
           </button>
         </div>
@@ -161,7 +173,7 @@ export function CreateBookingForm() {
               ))}
             </ul>
           ) : null}
-          {result.booking ? <p>Assigned items: {getAssignedItemLabels(result.booking).join(", ")}</p> : null}
+          {result.booking ? <p>Assigned items: {getAssignedItemLabels(result.booking, inventoryItems).join(", ")}</p> : null}
         </div>
       ) : null}
     </section>

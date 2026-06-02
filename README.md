@@ -7,8 +7,9 @@ This first slice focuses on the backend shape:
 - database schema for inventory items and bookings
 - seed data with 20 sample inventory items
 - booking conflict detection that blocks overlapping bookings for the same item
-- tests covering blocked and allowed booking windows
+- tests covering blocked and allowed booking windows plus inventory barcode validation
 - functional inventory management screens for dashboard, inventory, booking list, and booking creation
+- inventory maintenance workflows for create, edit, status change, and retirement
 
 ## Local Development
 
@@ -43,6 +44,8 @@ Bookings use inclusive date ranges. If an item is booked from `2026-06-01` throu
 
 - `/` dashboard
 - `/inventory` inventory list
+- `/inventory/new` create inventory item
 - `/inventory/[itemId]` inventory detail
+- `/inventory/[itemId]/edit` edit inventory item
 - `/bookings` booking list
 - `/bookings/new` create booking

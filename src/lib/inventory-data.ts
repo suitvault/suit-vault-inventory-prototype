@@ -21,8 +21,11 @@ export function getUpcomingBookingsForItem(itemId: string, bookings: Booking[] =
   return getBookingsForItem(itemId, bookings).filter((booking) => isActiveBookingStatus(booking.status));
 }
 
-export function getAssignedItemLabels(booking: Booking): string[] {
-  const inventoryById = getInventoryItemsById();
+export function getAssignedItemLabels(
+  booking: Booking,
+  inventoryItems: InventoryItem[] = sampleInventoryItems
+): string[] {
+  const inventoryById = new Map(inventoryItems.map((item) => [item.id, item]));
 
   return booking.inventoryItemIds.map((itemId) => {
     const item = inventoryById.get(itemId);

@@ -35,6 +35,17 @@ export type InventoryItem = {
   notes: string;
 };
 
+export type InventoryItemFormValues = Omit<InventoryItem, "id" | "sku">;
+
+export type InventoryStatusHistoryEntry = {
+  id: string;
+  inventoryItemId: string;
+  fromStatus?: InventoryStatus;
+  toStatus: InventoryStatus;
+  changedAt: string;
+  note: string;
+};
+
 export type Booking = {
   id: string;
   bookingNumber?: string;

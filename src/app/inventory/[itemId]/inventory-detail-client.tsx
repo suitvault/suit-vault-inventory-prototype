@@ -2,10 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { readCreatedBookings, subscribeToCreatedBookings } from "@/lib/browser-booking-store";
+import {
+  changeInventoryStatus,
+  readInventoryItems,
+  readStatusHistory,
+  retireInventoryItem,
+  subscribeToInventory
+} from "@/lib/browser-inventory-store";
 import { formatBookingNumber, formatEnumLabel, formatMoney } from "@/lib/formatting";
 import { getUpcomingBookingsForItem } from "@/lib/inventory-data";
 import { sampleBookings } from "@/lib/sample-bookings";
-import type { Booking, InventoryItem } from "@/lib/types";
+import { inventoryStatuses } from "@/lib/types";
+import type { Booking, InventoryItem, InventoryStatus, InventoryStatusHistoryEntry } from "@/lib/types";
 
 function getStatusClass(status: string): string {
   if (status === "AVAILABLE") {
@@ -19,8 +27,13 @@ function getStatusClass(status: string): string {
   return "status status-warning";
 }
 
-export function InventoryDetailClient({ item }: { item: InventoryItem }) {
+export function InventoryDetailClient({ itemId, initialItem }: { itemId: string; initialItem?: InventoryItem }) {
+  const [items, setItems] = useState<InventoryItem[]>(initialItem ? [initialItem] : []);
+  const [history, setHistory] = useState<InventoryStatusHistoryEntry[]>([]);
   const [createdBookings, setCreatedBookings] = useState<Booking[]>([]);
+  const [nextStatus, setNextStatus] = useState<InventoryStatus>(initialItem?.status ?? "AVAILABLE");
+  const [statusNote, setStatusNote] = useState("");
+  const [retireNote, setRetireNote] = useState("");
 
   useEffect(() => {
     const refresh = () => setCreatedBookings(readCreatedBookings());
@@ -28,10 +41,55 @@ export function InventoryDetailClient({ item }: { item: InventoryItem }) {
     return subscribeToCreatedBookings(refresh);
   }, []);
 
+  useEffect(() => {
+    const refresh = () => {
+      setItems(readInventoryItems());
+      setHistory(readStatusHistory());
+    };
+
+    refresh();
+    return subscribeToInventory(refresh);
+  }, []);
+
+  const item = useMemo(() => items.find((candidate) => candidate.id === itemId) ?? initialItem, [items, initialItem, itemId]);
+
+  useEffect(() => {
+    if (item) {
+      setNextStatus(item.status);
+    }
+  }, [item]);
+
   const upcomingBookings = useMemo(
-    () => getUpcomingBookingsForItem(item.id, [...sampleBookings, ...createdBookings]),
-    [createdBookings, item.id]
+    () => (item ? getUpcomingBookingsForItem(item.id, [...sampleBookings, ...createdBookings]) : []),
+    [createdBookings, item]
   );
+
+  const statusHistory = useMemo(
+    () => history.filter((entry) => entry.inventoryItemId === itemId),
+    [history, itemId]
+  );
+
+  function handleStatusChange() {
+    if (!item) {
+      return;
+    }
+
+    changeInventoryStatus(item.id, nextStatus, statusNote);
+    setStatusNote("");
+  }
+
+  function handleRetire() {
+    if (!item) {
+      return;
+    }
+
+    retireInventoryItem(item.id, retireNote);
+    setRetireNote("");
+  }
+
+  if (!item) {
+    return <p className="empty-state">Inventory item not found. It may have been removed from local prototype storage.</p>;
+  }
 
   return (
     <>
@@ -98,6 +156,82 @@ export function InventoryDetailClient({ item }: { item: InventoryItem }) {
             <dd>{item.notes}</dd>
           </div>
         </dl>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <h2>Change Status</h2>
+        </div>
+        <div className="form-grid">
+          <label>
+            Status
+            <select value={nextStatus} onChange={(event) => setNextStatus(event.target.value as InventoryStatus)}>
+              {inventoryStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {formatEnumLabel(status)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            History note
+            <textarea value={statusNote} onChange={(event) => setStatusNote(event.target.value)} rows={3} />
+          </label>
+          <div className="actions">
+            <button className="button" type="button" onClick={handleStatusChange} disabled={nextStatus === item.status}>
+              Save status
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <h2>Retire Inventory Item</h2>
+        </div>
+        <div className="form-grid">
+          <label>
+            Retirement note
+            <textarea value={retireNote} onChange={(event) => setRetireNote(event.target.value)} rows={3} />
+          </label>
+          <div className="actions">
+            <button className="button" type="button" onClick={handleRetire} disabled={item.status === "RETIRED"}>
+              Retire item
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <h2>Status History</h2>
+        </div>
+        {statusHistory.length === 0 ? (
+          <p className="empty-state">No status changes recorded yet.</p>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Changed At</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statusHistory.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>{new Date(entry.changedAt).toLocaleString()}</td>
+                    <td>{entry.fromStatus ? formatEnumLabel(entry.fromStatus) : "New item"}</td>
+                    <td>{formatEnumLabel(entry.toStatus)}</td>
+                    <td>{entry.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section className="panel">
