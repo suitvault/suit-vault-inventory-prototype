@@ -8,6 +8,7 @@ This first slice focuses on the backend shape:
 - seed data with 20 sample inventory items
 - booking conflict detection that blocks overlapping bookings for the same item
 - tests covering blocked and allowed booking windows
+- functional inventory management screens for dashboard, inventory, booking list, and booking creation
 
 ## Local Development
 
@@ -37,3 +38,11 @@ npm test
 ## Booking Rule
 
 Bookings use inclusive date ranges. If an item is booked from `2026-06-01` through `2026-06-05`, another booking for that same item starting on `2026-06-05` is considered overlapping and is blocked. A booking starting on `2026-06-06` is allowed.
+
+## Prototype Routes
+
+- `/` dashboard
+- `/inventory` inventory list
+- `/inventory/[itemId]` inventory detail
+- `/bookings` booking list
+- `/bookings/new` create booking

@@ -32,6 +32,7 @@ export type InventoryItem = {
 
 export type Booking = {
   id: string;
+  bookingNumber?: string;
   customerName: string;
   customerEmail?: string;
   inventoryItemIds: string[];
